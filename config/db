@@ -1,0 +1,20 @@
+const mysql = require("mysql");
+let state = {
+    pool: null
+};
+
+exports.connect = function (done) {
+    state.pool = mysql.createPool({
+        multipleStatements: true,
+        connectionLimit: 100,
+        host: 'mysql3.csse.canterbury.ac.nz',
+        user: 'hta55',
+        password: '4670kp11',
+        database: 'hta55'
+    });
+    done(); //call the callback
+};
+
+exports.get_pool = function () {
+    return state.pool;
+};
