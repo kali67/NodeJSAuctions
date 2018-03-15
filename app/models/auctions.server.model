@@ -1,0 +1,18 @@
+const databaseHelper = require('../models/database.server.model');
+const globals = require('../utilities/GlobalObjects');
+
+
+exports.viewAuction = function(data){
+    let sql = "select * from auctions where ";
+    let conditions = "";
+    if (data.query.startIndex)
+    let count = data.query.count;
+    let q = data.query.count;
+    let category_id = data.query.category_id;
+    let seller = data.query.seller;
+    let bidder = data.query.bidder;
+    let winner = data.query.winner;
+
+    //if (startIndex)
+        //sql + "startIndex = " +
+};

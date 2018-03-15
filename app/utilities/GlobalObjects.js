@@ -5,6 +5,11 @@ exports.UnauthorizedLogin = {
     message: "Invalid username/email/password supplied"
 };
 
+exports.Unauthorized = {
+    code: 401,
+    message: "Unauthorized"
+};
+
 exports.OK = {
     code: 200,
     message: "OK"
@@ -30,4 +35,8 @@ exports.OKCreated = {
     message: "OK"
 };
 
+exports.InternalServerError = {
+    code: 500,
+    message: "Internal server error"
+};
 exports.token = crypto.randomBytes(32 * (3 / 4)).toString("base64");
