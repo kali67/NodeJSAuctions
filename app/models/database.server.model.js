@@ -10,16 +10,19 @@ exports.queryWithPromise = function(query, values){
     return new Promise((resolve, reject) =>{
         db.get_pool().query(query, values, (err, result) => {
             if (!err){
-                console.log(query);
                 resolve({info:globals.OK, result:result});
             } else {
                 console.log(err);
-                reject(globals.MalformedRequest);
+                if( err.Error === Error.ER_DUP_ENTRY) {
+                    reject(globals.MalformedRequest);
+                }
+                else{
+                    reject(globals.BadRequest);
+                }
             }
         });
     });
 };
-
 
 exports.reset = function(done){
     let query = fs.readFileSync(resetDatabaseSqlPath, ENCODING);

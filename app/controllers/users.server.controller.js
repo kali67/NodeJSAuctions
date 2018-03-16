@@ -2,10 +2,8 @@ const User = require('../models/users.server.model');
 const databaseHelper = require('../models/database.server.model');
 
 exports.createUser = function (req, res) {
-    let values = [
-        [req.body.username], [req.body.givenName], [req.body.familyName],
-        [req.body.email],[req.body.password]
-    ];
+    let values = [[req.body.username], [req.body.givenName],
+        [req.body.familyName], [req.body.email],[req.body.password]];
     User.createUser(values)
         .then((result) => res.send(result))
         .catch((reason => res.status(reason.code).send(reason.message)));

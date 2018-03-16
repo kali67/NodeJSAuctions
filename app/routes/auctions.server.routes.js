@@ -5,10 +5,10 @@ module.exports = function(app){
     app.route('/api/v1/auctions')
         .post(lib.authenticateToken, auction.createAuction)
         .get(auction.viewAuction);
-    // app.route('/api/v1/auctions/:id')
-    //     .get(auction.getAuction)
+    app.route('/api/v1/auctions/:id')
+         .get(auction.getAuction);
     //     .patch(auction.patchAuction);
-    // app.route('/api/v1/auctions/:id/bids')
-    //     .get(auction.getAuctionBids)
+    app.route('/api/v1/auctions/:id/bids')
+        .get(auction.getAuctionBids);
     //     .post(auction.makeBid);
 };

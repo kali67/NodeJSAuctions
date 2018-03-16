@@ -58,7 +58,6 @@ exports.getUserData = function(responseData, userTwo){
         },() => {return Promise.reject(globals.MalformedRequest)});
 };
 
-
 exports.findUserByToken = function (token) {
     let sql = "select user_id from auction_user where user_token = ?";
     return databaseHelper.queryWithPromise(sql, [[token]])
