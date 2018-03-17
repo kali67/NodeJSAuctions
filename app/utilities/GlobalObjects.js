@@ -10,6 +10,11 @@ exports.Unauthorized = {
     message: "Unauthorized"
 };
 
+exports.Forbidden = {
+    code:403,
+    message:"Forbidden - bidding has begun on the auction."
+};
+
 exports.OK = {
     code: 200,
     message: "OK"

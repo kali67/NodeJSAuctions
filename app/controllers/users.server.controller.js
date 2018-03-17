@@ -18,7 +18,7 @@ exports.read = function(req, res){
         .catch((reason) => res.status(reason.code).send(reason.message));
 };
 
-exports.authenticateUser = function(req, res){
+exports.authenticateUser = function(req, res){ //TODO: check if query params exist, if not bad request
     let username = req.query.username;
     let email = req.query.email;
     let password = req.query.password;

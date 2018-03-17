@@ -45,7 +45,6 @@ exports.getUserData = function(responseData, userTwo){
     }
     let sql = "select user_username as username, user_givenname as givenName, user_familyname as familyName " +
         "from auction_user where user_id = ?";
-    console.log(userOne, userTwo);
     if (userOne.toString() === userTwo.toString()){
         sql = "select user_username as username, user_givenname as givenName, user_familyname as familyName, " +
             "user_email as email, user_accountbalance as accountbalance" +
@@ -83,8 +82,8 @@ exports.patchUser = function(requestBody, userId){
     if (requestBody.familyName) condition += ", user_familyname = '" + requestBody.familyName + "'";
     if (requestBody.email) condition += ", user_email = '" + requestBody.email + "'";
     if (requestBody.password) condition += ", user_password = '" + requestBody.password + "'";
-    condition.trim(",");
-    query += condition += " where user_id = " + userId;
+    condition = condition.substring(1);
+    query = query + condition + " where user_id = " + userId;
     return databaseHelper.queryWithPromise(query)
         .then(() => {return Promise.resolve(globals.OKCreated)});
 };

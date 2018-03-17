@@ -6,9 +6,9 @@ module.exports = function(app){
         .post(lib.authenticateToken, auction.createAuction)
         .get(auction.viewAuction);
     app.route('/api/v1/auctions/:id')
-         .get(auction.getAuction);
-    //     .patch(auction.patchAuction);
+         .get(auction.getAuction)
+         .patch(lib.authenticateToken, auction.updateAuction);
     app.route('/api/v1/auctions/:id/bids')
-        .get(auction.getAuctionBids);
-    //     .post(auction.makeBid);
+        .get(auction.getAuctionBids)
+        .post(lib.authenticateToken, auction.makeBid);
 };

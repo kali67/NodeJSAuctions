@@ -1,6 +1,7 @@
 const databaseHelper = require('../models/database.server.model');
 const user = require('../models/users.server.model');
 const globals = require('../utilities/GlobalObjects');
+const dateformat = require('dateformat');
 
 
 exports.viewAuction = function(data){
@@ -15,6 +16,90 @@ exports.viewAuction = function(data){
 
     //if (startIndex)
         //sql + "startIndex = " +
+};
+
+
+function  verifyBidAndPlace(bid, amount, auctionId, user){
+    let sql = "insert into bid (bid_amount, bid_userid, bid_auctionid, bid_datetime) values (?,?,?,?)";
+    let now = new Date();
+    if (bid.result[0]) {
+        if (bid.result[0].amount < amount){
+            return databaseHelper.queryWithPromise(sql, [[amount],[user.result[0].user_id],[auctionId], [dateformat(now, "isoDateTime")]]);
+        }
+    }
+    return Promise.reject(globals.BadRequest);
+
+}
+
+function checkAuctionExists(auctionId){
+    let sql = "select * from auction where auction_id = ?";
+    return databaseHelper.queryWithPromise(sql, [[auctionId]])
+        .then((result) => {
+            if (result.result[0]){return Promise.resolve()}
+            else {return Promise.reject(globals.NotFoundRequest)}})
+        .catch((reason) => {return Promise.reject(reason)});
+}
+
+function getMaxBidForAuction(auctionId){
+    let sql = "select MAX(bid_amount) as amount from bid where bid_auctionid = ?";
+    return databaseHelper.queryWithPromise(sql, [[auctionId]])
+        .then((result) => {return Promise.resolve(result)})
+        .catch((reason) => {return Promise.reject(reason)});
+}
+
+exports.patchAuction = function(body, auctionId){
+    let sql = "update auction set ";
+    let condition = "";
+    let values = [];
+    if (body.categoryId) {
+        values.push(body.categoryId);
+        condition += ",auction_categoryid = ?";
+    }
+    if (body.title){
+        values.push(body.title);
+        condition += ",auction_title = ?";
+    }
+    if (body.description){
+        values.push(body.description);
+        condition += ",auction_description = ?";
+    }
+    if (body.startDateTime){
+        values.push(body.startDateTime);
+        condition += ",auction_startingdate = ?";
+    }
+    if (body.endDateTime){
+        values.push(body.endDateTime);
+        condition += ",auction_endingdate = ?";
+    }
+    if (body.reservePrice){
+        values.push(body.reservePrice);
+        condition += ",auction_reservePrice = ?";
+    }
+    if (body.startingbid){
+        values.push(body.startingbid);
+        condition += ",auction_startingbid = ?";
+    }
+    condition = condition.substring(1);
+    return checkAuctionExists(auctionId)
+        .then(() => getAuctionBids(auctionId))
+        .then((auction) => {
+            if(auction.bids[0]){
+                return Promise.resolve(globals.Forbidden);
+            } else {
+                return databaseHelper.queryWithPromise(sql + condition, values)}}, (reason) => Promise.reject(reason))
+        .then((result) => {return Promise.resolve(result)})
+        .catch((reason) => {return Promise.reject(reason)});
+};
+
+exports.placeBid = function(amount, auction_id, user){
+    if (!amount){return Promise.reject(globals.BadRequest)}
+    else {
+        return checkAuctionExists(auction_id)
+            .then(() => getMaxBidForAuction(auction_id), (reason) => {return Promise.reject(reason)})
+            .then((bid) => verifyBidAndPlace(bid, amount, auction_id, user))
+            .then(() => {return Promise.resolve(globals.OK)})
+            .catch((reason) => {return Promise.reject(reason)});
+    }
 };
 
 exports.createNewAuction = function(body, token){
@@ -50,9 +135,7 @@ exports.getAuctionById = function (auctionId) {
         " from auction JOIN auction_user ON auction.auction_userid =" +
         " auction_user.user_id JOIN category ON auction.auction_categoryid = category.category_id where auction.auction_id = ?";
     return databaseHelper.queryWithPromise(sql, [[auctionId]])
-        .then((result) => {
-            if (result.result[0]){return getAuctionBids(auctionId, result);}
-            else {return Promise.reject(globals.NotFoundRequest)}})
+        .then((result) => getAuctionBids(auctionId, result), (reason) => Promise.reject(reason))
         .then((result) => getAuctionCurrentBid(auctionId, result))
         .then((result) => getFormattedAuctionJson(result))
         .then((result) => {return Promise.resolve(result)})
@@ -66,11 +149,10 @@ function getAuctionBids(auctionId, auction){
         "id.bid_datetime as datetime, bid.bid_userid as buyerId, auction_user.user_username as buyerUsername " +
         "from bid JOIN auction ON auction.auction_id = bid.bid_auctionid " +
         "JOIN auction_user ON bid.bid_userid = auction_user.user_id where auction.auction_id = ?";
-    return databaseHelper.queryWithPromise(sql, [[auctionId]])
-        .then((bids) => {
-            if (bids.result[0]){return Promise.resolve({auction:auction, bids:JSON.parse(JSON.stringify(bids.result))})}
-            else {return Promise.reject(globals.NotFoundRequest)}}, //reject with not found if results in nothing
-            () => {return Promise.reject(reason)}); //catch any other error that falls through the FIRST promise
+    return checkAuctionExists(auctionId)
+        .then(() => databaseHelper.queryWithPromise(sql, [[auctionId]]), (reason) => {return Promise.reject(reason)})
+        .then((bids) => {return Promise.resolve({auction:auction, bids:JSON.parse(JSON.stringify(bids.result))})})
+        .catch((reason) => {return Promise.reject(reason)}); //catch any other error that falls through the FIRST promise
 }
 
 function getAuctionCurrentBid(auctionId, auctionData) {

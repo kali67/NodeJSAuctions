@@ -1,5 +1,6 @@
 const auction = require('../models/auctions.server.model');
 const databaseHelper = require('../models/database.server.model');
+const user = require('../models/users.server.model');
 
 
 exports.createAuction = function(req, res){
@@ -23,7 +24,20 @@ exports.getAuction = function(req, res) {
 };
 
 exports.getAuctionBids = function(req, res){
-    auction.getAuctionBids(req.params.id, null)
-        .then((result) => res.status(200).send(result.bids))
+    auction.getAuctionBids(req.params.id)
+        .then((result) => res.send(result))
+        .catch((reason) => res.status(reason.code).send(reason.message));
+};
+
+exports.makeBid = function(req, res){
+    user.findUserByToken(req.header('X-Authorization'))
+        .then((user) => auction.placeBid(req.query.amount, req.params.id, user))
+        .then((result) => res.status(result.code).send(result.message))
+        .catch((reason) => res.status(reason.code).send(reason.message));
+};
+
+exports.updateAuction = function(req, res){
+    auction.patchAuction(req.body, req.params.id)
+        .then((result) => res.status(result.info.code).send(result.info.message))
         .catch((reason) => res.status(reason.code).send(reason.message));
 };
