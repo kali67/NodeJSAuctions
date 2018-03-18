@@ -19,7 +19,7 @@ exports.viewAuction = function(data){
 };
 
 
-function  verifyBidAndPlace(bid, amount, auctionId, user){
+function verifyBidAndPlace(bid, amount, auctionId, user){
     let sql = "insert into bid (bid_amount, bid_userid, bid_auctionid, bid_datetime) values (?,?,?,?)";
     let now = new Date();
     if (bid.result[0]) {
@@ -142,8 +142,6 @@ exports.getAuctionById = function (auctionId) {
         .catch((reason) => {return Promise.reject(reason)});
 };
 
-exports.getAuctionBids = getAuctionBids;
-
 function getAuctionBids(auctionId, auction){
     let sql = "SELECT bid.bid_amount as amount, b" +
         "id.bid_datetime as datetime, bid.bid_userid as buyerId, auction_user.user_username as buyerUsername " +
@@ -188,3 +186,7 @@ function getFormattedAuctionJson(auction) {
     };
     return {auctionObj:auctionObj, info:auction.auctionData.auction.info}
 }
+
+exports.getAuctionBids = getAuctionBids;
+
+exports.checkAuctionExists = checkAuctionExists;

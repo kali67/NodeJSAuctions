@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
 exports.UnauthorizedLogin = {
-    code: 401,
+    code: 400,
     message: "Invalid username/email/password supplied"
 };
 

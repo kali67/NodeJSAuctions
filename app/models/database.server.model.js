@@ -28,16 +28,16 @@ exports.queryWithPromise = function(query, values){
 exports.reset = function(done){
     let query = fs.readFileSync(resetDatabaseSqlPath, ENCODING);
     db.get_pool().query(query, function (err){
-        if (err) done (400, "Malformed request.");
-        else done(200, "OK");
+        if (err) done (globals.MalformedRequest);
+        else done(globals.OK);
     });
 };
 
 exports.resample = function(done){
     let query = fs.readFileSync(reloadDatabaseSqlDataPath, ENCODING);
     db.get_pool().query(query, function (err) {
-       if (err) done (400, "Malformed request.");
-       else done (201, "Sample of data has been reloaded.");
+       if (err) done (globals.MalformedRequest);
+       else done (globals.OKCreated);
     });
 };
 
