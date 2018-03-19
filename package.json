@@ -9,6 +9,7 @@
     "body-parser": "^1.17.2",
     "express": "^4.15.3",
     "fs": "^0.0.1-security",
-    "dateformat": "^3.0.3"
+    "dateformat": "^3.0.3",
+    "pipe": "^1.1.0"
   }
 }

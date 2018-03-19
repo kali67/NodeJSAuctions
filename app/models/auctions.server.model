@@ -35,7 +35,7 @@ function checkAuctionExists(auctionId){
     let sql = "select * from auction where auction_id = ?";
     return databaseHelper.queryWithPromise(sql, [[auctionId]])
         .then((result) => {
-            if (result.result[0]){return Promise.resolve()}
+            if (result.result[0]){return Promise.resolve(globals.OK)}
             else {return Promise.reject(globals.NotFoundRequest)}})
         .catch((reason) => {return Promise.reject(reason)});
 }
@@ -105,7 +105,7 @@ exports.placeBid = function(amount, auction_id, user){
 exports.createNewAuction = function(body, token){
     return user.findUserByToken(token)
         .then((result) => insertAuction(result.result[0].user_id,body),
-            (reason) => {return Promise.reject(reason)})
+            (reason) => {console.log(reason);return Promise.reject(reason)})
         .then(() => getMaxAuctionId())
         .then((result) => {return Promise.resolve(result)})
         .catch((reason) => {return Promise.reject(reason)});

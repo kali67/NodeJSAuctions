@@ -7,7 +7,7 @@ exports.createAuction = function(req, res){
     let token = req.header('X-Authorization');
     auction.createNewAuction(req.body, token)
         .then((result) => res.status(result.info.code).json(result.result[0]))
-        .catch((reason) => res.send(reason));
+        .catch((reason) => res.status(reason.code).send(reason.message));
 };
 
 exports.viewAuction = function(req, res){
