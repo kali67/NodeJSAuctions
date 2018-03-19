@@ -64,14 +64,16 @@ exports.getUserData = function(responseData, userTwo){
         },() => {return Promise.reject(globals.MalformedRequest)});
 };
 
-exports.findUserByToken = function (token) {
+exports.findUserByToken = findUserByToken;
+
+function findUserByToken (token) {
     let sql = "select user_id from auction_user where user_token = ?";
     return databaseHelper.queryWithPromise(sql, [[token]])
         .then((user) => {
-            if (user.result[0]){return Promise.resolve(user)}
+            if (user.result[0]){return Promise.resolve(user.result[0])}
             else {return Promise.reject(globals.Unauthorized)}
         },(reason) => {return Promise.reject(reason)});
-};
+}
 
 exports.removeTokenFromUser = function (user) {
     let values = [[user.result[0].user_id]];
@@ -81,7 +83,7 @@ exports.removeTokenFromUser = function (user) {
         .catch(() => {return Promise.reject(globals.InternalServerError)})
 };
 
-exports.patchUser = function(requestBody, userId){
+exports.patchUser = function(requestBody, givenUserId, token){
     let query = "update auction_user set ";
     let condition = "";
     if (requestBody.username) condition += ",user_username = '" + requestBody.username + "'";
@@ -90,8 +92,12 @@ exports.patchUser = function(requestBody, userId){
     if (requestBody.email) condition += ", user_email = '" + requestBody.email + "'";
     if (requestBody.password) condition += ", user_password = '" + requestBody.password + "'";
     condition = condition.substring(1);
-    query = query + condition + " where user_id = " + userId;
-    return databaseHelper.queryWithPromise(query)
-        .then(() => {return Promise.resolve(globals.OKCreated)});
+    query = query + condition + " where user_id = " + givenUserId;
+    return findUserByToken(token)
+        .then((userId) => {
+            if (userId.user_id.toString() === givenUserId.toString()){databaseHelper.queryWithPromise(query)
+            } else { return Promise.reject(globals.Unauthorized)}})
+        .then(() => {return Promise.resolve(globals.OKCreated)})
+        .catch((reason) => {return Promise.reject(reason)});
 };
 

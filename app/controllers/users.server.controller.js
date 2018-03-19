@@ -36,7 +36,7 @@ exports.logout = function(req, res) {
 };
 
 exports.patchUser = function(req, res){
-    User.patchUser(req.body, req.params.id)
+    User.patchUser(req.body, req.params.id, req.header('X-Authorization'))
         .then((result) => res.status(result.code).json(result.message))
         .catch((reason) => res.status(reason.code).json(reason.message)); //TODO: malformed request
 };

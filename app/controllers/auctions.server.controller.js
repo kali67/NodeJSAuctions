@@ -6,14 +6,14 @@ const user = require('../models/users.server.model');
 exports.createAuction = function(req, res){
     let token = req.header('X-Authorization');
     auction.createNewAuction(req.body, token)
-        .then((result) => res.status(result.info.code).json(result.result[0]))
+        .then((result) => res.status(result.info.code).json(result.data.result[0]))
         .catch((reason) => res.status(reason.code).send(reason.message));
 };
 
 exports.viewAuction = function(req, res){
     auction.viewAuction(req)
-        .then((result) => res.status(result.code).json(result.message))
-        .catch((reason) => console.log(reason));
+        .then((result) => res.send(result.result))
+        .catch((reason) => console.log(reason)); //TODO:
 
 };
 
@@ -25,7 +25,7 @@ exports.getAuction = function(req, res) {
 
 exports.getAuctionBids = function(req, res){
     auction.getAuctionBids(req.params.id)
-        .then((result) => res.send(result))
+        .then((result) => res.status(result.info.code).send(result.bids))
         .catch((reason) => res.status(reason.code).json(reason.message));
 };
 

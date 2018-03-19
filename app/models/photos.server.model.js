@@ -16,7 +16,7 @@ function findPhoto (auctionId) {
     return databaseHelper.queryWithPromise(sql, [[auctionId]])
         .then((result) => {
             if (result.result[0]){return Promise.resolve(result.result[0])}
-            else {return Promise.reject(globals.NotFoundRequest)}//TODO: no photos?
+            else {return Promise.reject(globals.BadRequest)}//TODO: no photos?
         }).catch((reason) => {return Promise.reject(reason)});
 }
 
@@ -27,19 +27,25 @@ exports.uploadPhoto = function(request){
     let uri = "app/lib/photos/" + auctionid + ".png";
     if (contentType === "image/jpeg"){uri = "app/lib/photos/" + auctionid + ".jpeg"}
     return auction.checkAuctionExists(auctionid)
-        .then(() => {
+        .then(() => findPhoto(auctionid))
+        .then(() => {return Promise.reject(globals.BadRequest)}, //TODO:
+            () => {
             request.pipe(fs.createWriteStream(uri));
             databaseHelper.queryWithPromise("insert into photo (photo_auctionid, " +
                 "photo_image_URI) values (?,?)", [[auctionid], [uri]]);})
         .then(() => {return Promise.resolve(globals.OKCreated)})
-        .catch((reason) => {return Promise.reject(reason)});
+        .catch(() => {return Promise.reject(globals.BadRequest)});
 };
 
 exports.deletePhoto = function(auctionId){
     let sql = "delete from photo where photo_auctionid = ?";
+    let photoPath;
     return auction.checkAuctionExists(auctionId)
-        .then(() => databaseHelper.queryWithPromise(sql, [[auctionId]]), (reason) => {return Promise.reject(reason)})
-        .then(() => {fs.unlinkSync();return Promise.resolve(globals.OK)})
+        .then(() => findPhoto(auctionId), (reason) => {return Promise.reject(reason)})
+        .then((path) => {photoPath = path;databaseHelper.queryWithPromise(sql, [[auctionId]])}, (reason) => {return Promise.reject(reason)})
+        .then(() => {
+            fs.unlinkSync(photoPath.photo_image_URI);
+            return Promise.resolve(globals.OK)})
         .catch((reason) => {return Promise.reject(reason)});
 };
 
