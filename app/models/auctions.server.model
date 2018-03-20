@@ -5,44 +5,64 @@ const dateformat = require('dateformat');
 
 
 exports.viewAuction = function(data){
-    let sql = "select * from auction JOIN bid ON auction.auction_userid = bid.bid_userid ";
+    let sql = "select auction.auction_id as id, category.category_title as categoryTitle," +
+        "auction.auction_categoryid as categoryId, auction.auction_title as title," +
+        "auction.auction_reserveprice as reservePrice, auction.auction_startingdate as startDateTime," +
+        "auction.auction_endingdate as endDateTime, MAX(bid.bid_amount) as currentBid from auction " +
+        "JOIN category ON auction.auction_categoryid = category.category_id " +
+        "LEFT JOIN bid ON bid.bid_auctionid = auction.auction_id ";
     let values= [];
     let conditions = "";
-
     if (data.query.categoryid) {
         values.push(data.query.categoryid);
-        conditions += "AND auction.auction_categoryid = ? ";
+        conditions += " AND auction.auction_categoryid = ?";
     }
     if (data.query.seller){
         values.push(data.query.seller);
-        conditions += "AND auction.auction_user_id = ? ";
+        conditions += " AND auction.auction_user_id = ?";
     }
     if (data.query.bidder){
         values.push(data.query.bidder);
-        conditions += "AND bid.bid_userid = ? ";
+        conditions += " AND bid.bid_userid = ?";
     }
     if (data.query.q){
         values.push(data.query.q);
-        conditions += "AND auction.auction_title like '%" + data.query.q + "%' "; //TODO:
+        conditions += " AND auction.auction_title like '%" + data.query.q + "%' "; //TODO:
     }
-
-    conditions = conditions.substring(4);
-    sql = sql + "where " + conditions; //TODO:
+    conditions = conditions.substring(5);
+    sql = sql + "where " + conditions + " group by auction.auction_id order by auction.auction_startingdate DESC"; //TODO:
     return databaseHelper.queryWithPromise(sql, values)
         .then((result) => {
-            if (data.query.startIndex){
-                if (data.query.startIndex > result.size){
-                    return Promise.reject(globals.BadRequest);
-                } else {
-                    return Promise.resolve(result.slice(startIndex))
-                }
-
-            }
-            return Promise.resolve(result)
+            let res = applyResultContraints(result, data.query.startIndex, data.query.count);
+            console.log(res);
+            return Promise.resolve(res);
         })
         .catch((reason) => {return Promise.reject(reason)});
 };
 
+
+function applyResultContraints(result, startIndex, count){
+    let results = [];
+    if (startIndex){
+        if (startIndex >= result.result.length){
+            return {info:globals.BadRequest};
+        } else {
+            results = result.result.slice(startIndex, result.result.length);
+        }
+    } else if (count) {
+        if (count > result.result.length){
+            results = result.result;
+        }
+        else if (results.length === 0) {
+            results = result.result.slice(0,count - 1);
+        } else {
+            results = results.slice(0, count -1);
+        }
+    }else {
+        return {info:globals.OK, result:result};
+    }
+    return {info:globals.OK, result:results};
+}
 
 function verifyBidAndPlace(bid, amount, auctionId, user){
     let sql = "insert into bid (bid_amount, bid_userid, bid_auctionid, bid_datetime) values (?,?,?,?)";
@@ -188,6 +208,19 @@ function getAuctionCurrentBid(auctionId, auctionData) {
                 return Promise.resolve({currentBid:0, auctionData:auctionData});
             }
         }).catch((reason) => {return Promise.reject(reason)});
+}
+
+
+function getBasicAuctionDetails(){
+    return {
+        category: auctionRes.category,
+        categoryTitle: auctionRes.categoryTitle,
+        title: auctionRes.title,
+        reservePrice: auctionRes.reservePrice,
+        startDateTime: auctionRes.startDateTime,
+        endDateTime:auctionRes.endDateTime,
+        currentBid: getAuctionCurrentBid()
+    }
 }
 
 function getFormattedAuctionJson(auction) {
