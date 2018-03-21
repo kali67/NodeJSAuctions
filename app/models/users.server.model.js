@@ -54,7 +54,7 @@ exports.getUserData = function(responseData, userTwo){
         "from auction_user where user_id = ?";
     if (userOne.toString() === userTwo.toString()){
         sql = "select user_username as username, user_givenname as givenName, user_familyname as familyName, " +
-            "user_email as email, user_accountbalance as accountbalance" +
+            "user_email as email, user_accountbalance as accountBalance" +
             " from auction_user where user_id = ?";
     }
     return databaseHelper.queryWithPromise(sql, [[userTwo]])

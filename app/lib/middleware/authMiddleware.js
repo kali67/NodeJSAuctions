@@ -30,7 +30,7 @@ exports.checkOwnsAuction = function(req, res, next){
         .then((user) => {
             if (user.result[0] && user.result[0].auction_userid === userId){next()}
             else {res.status(globals.Unauthorized.code).send(globals.Unauthorized.message)}})
-        .catch((reason) => console.log(reason));
+        .catch(() => {res.status(globals.Unauthorized.code).send(globals.Unauthorized.message)});
 };
 
 exports.validateCreateAuctionJsonBody = function(req, res, next){
@@ -66,11 +66,11 @@ function userSchema (required){
     return  {
         "type": "object",
         "properties" : {
-            "username": {"type": "string", required : required},
+            "username": {"type": "string", required : required, minLength: 1},
             "givenName": {"type": "string", required : required},
             "familyName": {"type": "string", required : required},
             "email": {"type": "string", required : required, pattern: globals.EmailRegEx},
-            "password": {"type": "string", required : required}
+            "password": {"type": "string", required : required, minLength: 1}
         }
     }
 }

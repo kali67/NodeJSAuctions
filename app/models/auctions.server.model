@@ -14,8 +14,8 @@ exports.viewAuction = function(data){
     let end = " group by auction.auction_id order by auction.auction_startingdate DESC";
     let values= [];
     let conditions = "";
-    if (data.query.categoryid) {
-        values.push(data.query.categoryid);
+    if (data.query['category-id']) {
+        values.push(data.query['category-id']);
         conditions += " AND auction.auction_categoryid = ?";
     }
     if (data.query.seller){
@@ -152,7 +152,6 @@ exports.placeBid = function(amount, auction_id, user){
             .catch((reason) => {return Promise.reject(reason)});
     }
 };
-exports.p
 
 exports.createNewAuction = function(body, token){
     return user.findUserByToken(token)
@@ -180,7 +179,7 @@ function getMaxAuctionId() {
 }
 
 exports.getAuctionById = function (auctionId) {
-    let sql = "select auction_categoryid as category, category.category_title as categoryTitle," +
+    let sql = "select auction_categoryid as categoryId, category.category_title as categoryTitle," +
         "auction.auction_title as title, auction.auction_reservePrice as reservePrice, auction.auction_startingdate as startDateTime," +
         "auction.auction_endingdate as endDateTime, auction.auction_description as description, auction_creationdate as creationDateTime," +
         "auction_user.user_id as id, auction_user.user_username as username, auction.auction_startingprice as startingbid, " +
@@ -232,7 +231,7 @@ function getAuctionCurrentBid(auctionId, auctionData) {
 function getFormattedAuctionJson(auction) {
     let auctionRes = auction.auctionData.auction.result[0];
     let auctionObj =  {
-        category: auctionRes.category,
+        categoryId: auctionRes.categoryId,
         categoryTitle: auctionRes.categoryTitle,
         title: auctionRes.title,
         reservePrice: auctionRes.reservePrice,
