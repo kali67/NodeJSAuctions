@@ -2,9 +2,11 @@ const db = require('../../config/db');
 const globals = require('../utilities/GlobalObjects');
 const fs = require('fs');
 const errors = require("mysql/lib/protocol/constants/errors");
+const path = require('path');
 
 const resetDatabaseSqlPath = "../hta55/app/scripts/db_setup.sql";
 const reloadDatabaseSqlDataPath = "../hta55/app/scripts/db_resample.sql";
+const photosDirectory = "../hta55/app/lib/photos";
 const ENCODING = "utf8";
 
 exports.queryWithPromise = function(query, values){
@@ -13,7 +15,6 @@ exports.queryWithPromise = function(query, values){
             if (!err){
                 resolve({info:globals.OK, result:result});
             } else {
-                console.log(err);
                 if( err.errno === errors.ER_DUP_ENTRY) { //duplicate
                     reject(globals.MalformedRequest);
                 }
@@ -31,18 +32,31 @@ exports.queryWithPromise = function(query, values){
 exports.reset = function(done){
     let query = fs.readFileSync(resetDatabaseSqlPath, ENCODING);
     db.get_pool().query(query, function (err){
-        if (err) done (globals.MalformedRequest);
-        else done(globals.OK);
+        if (err) done (globals.InternalServerError);
+        else {
+            fs.readdir(photosDirectory, (err, files) => {
+                if (err) done (globals.InternalServerError);
+                if (files.length === 0){done(globals.OK)}
+                else {
+                    for (const file of files) {
+                    fs.unlink(path.join(photosDirectory, file), err => {
+                        if (err) done (globals.InternalServerError);
+                        else {done(globals.OK)}
+                    });
+                }}
+            });
+        }
     });
 };
 
 exports.resample = function(done){
     let query = fs.readFileSync(reloadDatabaseSqlDataPath, ENCODING);
     db.get_pool().query(query, function (err) {
-       if (err) done (globals.MalformedRequest);
+       if (err) done (globals.InternalServerError);
        else done (globals.OKCreated);
     });
 };
+
 
 
 

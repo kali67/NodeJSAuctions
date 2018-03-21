@@ -6,7 +6,7 @@ const fs = require('fs');
 exports.getPhotoFromAuction = function(req, res){
     photos.getPhoto(req.params.id, req.body)
         .then((result) => {
-            res.header({"Content-Type": "image/png"});
+            res.header({"Content-Type": "image/png"}); //TODO: check URI if jpeg or png
             res.status(global.OK.code);
             fs.createReadStream(result.photo_image_URI).pipe(res);})
         .catch((reason) => res.status(reason.code).send(reason.message));

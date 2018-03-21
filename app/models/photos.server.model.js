@@ -16,7 +16,7 @@ function findPhoto (auctionId) {
     return databaseHelper.queryWithPromise(sql, [[auctionId]])
         .then((result) => {
             if (result.result[0]){return Promise.resolve(result.result[0])}
-            else {return Promise.reject(globals.BadRequest)}//TODO: no photos?
+            else {return Promise.reject(globals.BadRequest)}
         }).catch((reason) => {return Promise.reject(reason)});
 }
 
@@ -28,11 +28,12 @@ exports.uploadPhoto = function(request){
     if (contentType === "image/jpeg"){uri = "app/lib/photos/" + auctionid + ".jpeg"}
     return auction.checkAuctionExists(auctionid)
         .then(() => findPhoto(auctionid))
-        .then(() => {return Promise.reject(globals.BadRequest)}, //TODO:
+        .then(() => {return Promise.reject(globals.BadRequest)},
             () => {
             request.pipe(fs.createWriteStream(uri));
             databaseHelper.queryWithPromise("insert into photo (photo_auctionid, " +
-                "photo_image_URI) values (?,?)", [[auctionid], [uri]]);})
+                "photo_image_URI) values (?,?)", [[auctionid], [uri]]);
+        })
         .then(() => {return Promise.resolve(globals.OKCreated)})
         .catch(() => {return Promise.reject(globals.BadRequest)});
 };

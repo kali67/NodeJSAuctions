@@ -8,10 +8,10 @@ function authenticateUser (data, password) {
         if (data.result[0].user_password !== password) {
             return Promise.reject(globals.UnauthorizedLogin);
         } else {
-            let token = globals.token;
+            let token = globals.token();
             return databaseHelper.queryWithPromise(query,[[token],[userId]])
                 .then((result) => {
-                    return Promise.resolve({res:result.info, data:{id:userId, token:token}})}) //TODO:
+                    return Promise.resolve({res:result.info, data:{id:userId, token:token}})})
                 .catch((reason) => {return Promise.reject(reason.info)});
         }
     } else{
@@ -76,10 +76,10 @@ function findUserByToken (token) {
 }
 
 exports.removeTokenFromUser = function (user) {
-    let values = [[user.result[0].user_id]];
+    let values = [[user.user_id]];
     let sql = "update auction_user set user_token = 'null' where user_id = ?";
     return databaseHelper.queryWithPromise(sql, values)
-        .then((result) => {console.log(result);return Promise.resolve(globals.OK)})
+        .then(() => {return Promise.resolve(globals.OK)})
         .catch(() => {return Promise.reject(globals.InternalServerError)})
 };
 
@@ -95,7 +95,8 @@ exports.patchUser = function(requestBody, givenUserId, token){
     query = query + condition + " where user_id = " + givenUserId;
     return findUserByToken(token)
         .then((userId) => {
-            if (userId.user_id.toString() === givenUserId.toString()){databaseHelper.queryWithPromise(query)
+            if (userId.user_id.toString() === givenUserId.toString()){
+                return databaseHelper.queryWithPromise(query);
             } else { return Promise.reject(globals.Unauthorized)}})
         .then(() => {return Promise.resolve(globals.OKCreated)})
         .catch((reason) => {return Promise.reject(reason)});

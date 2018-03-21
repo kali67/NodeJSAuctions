@@ -44,4 +44,9 @@ exports.InternalServerError = {
     code: 500,
     message: "Internal server error"
 };
-exports.token = crypto.randomBytes(32 * (3 / 4)).toString("base64");
+
+exports.token = function(){
+    return crypto.randomBytes(32 * (3 / 4)).toString("base64");
+};
+
+exports.EmailRegEx = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;

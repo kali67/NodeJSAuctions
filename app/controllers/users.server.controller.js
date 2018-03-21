@@ -18,7 +18,7 @@ exports.read = function(req, res){
         .catch((reason) => res.status(reason.code).json(reason.message));
 };
 
-exports.authenticateUser = function(req, res){ //TODO: check if query params exist, if not bad request
+exports.authenticateUser = function(req, res){
     let username = req.query.username;
     let email = req.query.email;
     let password = req.query.password;
@@ -38,5 +38,5 @@ exports.logout = function(req, res) {
 exports.patchUser = function(req, res){
     User.patchUser(req.body, req.params.id, req.header('X-Authorization'))
         .then((result) => res.status(result.code).json(result.message))
-        .catch((reason) => res.status(reason.code).json(reason.message)); //TODO: malformed request
+        .catch((reason) => res.status(reason.code).json(reason.message));
 };

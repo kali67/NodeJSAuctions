@@ -3,7 +3,7 @@ const lib = require('../lib/middleware/authMiddleware');
 
 module.exports = function(app){
     app.route('/api/v1/users')
-        .post(users.createUser);
+        .post(lib.validateCreateUserJsonBody, users.createUser);
     app.route('/api/v1/users/:id')
         .get(users.read);
     app.route('/api/v1/users/login')
@@ -11,5 +11,5 @@ module.exports = function(app){
     app.route('/api/v1/users/logout')
         .post(lib.authenticateToken, users.logout);
     app.route('/api/v1/users/:id')
-        .patch(lib.authenticateToken, users.patchUser);
+        .patch(lib.authenticateToken, lib.validatePatchUserJsonBody, users.patchUser);
 };

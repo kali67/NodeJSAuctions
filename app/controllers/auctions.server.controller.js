@@ -12,8 +12,8 @@ exports.createAuction = function(req, res){
 
 exports.viewAuction = function(req, res){
     auction.viewAuction(req)
-        .then((result) => res.status(result.info.code).send(result.result))
-        .catch((reason) => res.send(reason)); //TODO:
+        .then((result) => res.status(result.info.code).json(result.result))
+        .catch((reason) => res.status(reason.info.code).send(reason.info.message));
 
 };
 
