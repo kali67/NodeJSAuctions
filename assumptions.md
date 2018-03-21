@@ -11,3 +11,6 @@
 # Authorization
 * Authorization is checked first on PATCH auction and user, hence giving a ID that doesnt exist will return 401 Unauthorized rather than not found. A user should not be able to know if a user ID exists.
 * This is the same for PATCH on an auction that has already started. Auth is checked first before this check, hence will get Unauthorized first
+
+# Auctions
+*start index of 0 will be the first item in the list
