@@ -9,7 +9,7 @@ exports.connect = function (done) {
         connectionLimit: 100,
         host: 'mysql3.csse.canterbury.ac.nz',
         user: 'hta55',
-        password: '4670kp11',
+        password: '71929567',
         database: 'hta55'
     });
     done(); //call the callback

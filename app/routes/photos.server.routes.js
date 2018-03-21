@@ -4,6 +4,6 @@ const photos = require('../controllers/photos.server.controller');
 module.exports = function(app){
     app.route('/api/v1/auctions/:id/photos')
         .get(photos.getPhotoFromAuction)
-        .post(lib.authenticateToken,photos.postPhoto)
-        .delete(lib.authenticateToken, photos.deletePhoto);
+        .post(lib.checkOwnsAuction,photos.postPhoto)
+        .delete(lib.checkOwnsAuction, photos.deletePhoto);
 };

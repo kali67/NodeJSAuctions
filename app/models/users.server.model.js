@@ -66,6 +66,13 @@ exports.getUserData = function(responseData, userTwo){
 
 exports.findUserByToken = findUserByToken;
 
+exports.findAuctionOwner = function(auctionId){
+    let sql = "select auction_userid from auction where auction_id = ?";
+    return databaseHelper.queryWithPromise(sql, [[auctionId]])
+        .then((result) => {return Promise.resolve(result)})
+        .catch((reason) => {return Promise.reject(reason)});
+};
+
 function findUserByToken (token) {
     let sql = "select user_id from auction_user where user_token = ?";
     return databaseHelper.queryWithPromise(sql, [[token]])

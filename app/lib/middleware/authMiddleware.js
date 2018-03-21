@@ -9,6 +9,24 @@ exports.authenticateToken = function(req, res, next){
         .catch((reason) => res.status(reason.code).send(reason.message));
 };
 
+exports.checkOwnsAuction = function(req, res, next){
+    let token = req.header('X-Authorization');
+    let userId;
+    user.findUserByToken(token)
+        .then((result) => {
+            userId = result.user_id;
+            return user.findAuctionOwner(req.params.id);
+        })
+        .then((user) => {
+            if (user.result[0] && user.result[0].auction_userid === userId){next()}
+            else {res.status(globals.Unauthorized.code).send(globals.Unauthorized.message)}})
+        .catch((reason) => console.log(reason));
+};
+
+exports.checkOwns = function(req, res, next){
+
+};
+
 exports.validateCreateAuctionJsonBody = function(req, res, next){
     let v = new Validator();
     let schema = auctionSchema(true);
