@@ -20,7 +20,7 @@ exports.viewAuction = function(data){
     }
     if (data.query.seller){
         values.push(data.query.seller);
-        conditions += " AND auction.auction_user_id = ?";
+        conditions += " AND auction.auction_userid = ?";
     }
     if (data.query.bidder){
         values.push(data.query.bidder);
@@ -60,16 +60,14 @@ function applyResultContraints(result, startIndex, count){
     return Promise.resolve({info:globals.OK, result:results});
 }
 
-function verifyBidAndPlace(bid, amount, auctionId, user){
+function verifyBidAndPlace(bid, amount, auctionId, user, auctionObj){
     let sql = "insert into bid (bid_amount, bid_userid, bid_auctionid, bid_datetime) values (?,?,?,?)";
-    let now = new Date();
     if (bid.result[0]) {
-        if (bid.result[0].amount < amount) {
+        if (bid.result[0].amount < amount && amount > auctionObj.auction_startingprice) {
             return databaseHelper.queryWithPromise(sql, [[amount], [user.user_id], [auctionId], [new Date().toISOString()]]);
         }
     }
     return Promise.reject(globals.BadRequest);
-
 }
 
 function checkAuctionExists(auctionId){
@@ -77,6 +75,15 @@ function checkAuctionExists(auctionId){
     return databaseHelper.queryWithPromise(sql, [[auctionId]])
         .then((result) => {
             if (result.result[0]){return Promise.resolve(globals.OK)}
+            else {return Promise.reject(globals.NotFoundRequest)}})
+        .catch((reason) => {return Promise.reject(reason)});
+}
+
+function getAuction(auctionId){
+    let sql = "select * from auction where auction_id = ?";
+    return databaseHelper.queryWithPromise(sql, [[auctionId]])
+        .then((result) => {
+            if (result.result[0]){return Promise.resolve(result.result[0])}
             else {return Promise.reject(globals.NotFoundRequest)}})
         .catch((reason) => {return Promise.reject(reason)});
 }
@@ -135,13 +142,17 @@ exports.patchAuction = function(body, auctionId){
 exports.placeBid = function(amount, auction_id, user){
     if (!amount){return Promise.reject(globals.BadRequest)}
     else {
-        return checkAuctionExists(auction_id)
-            .then(() => getMaxBidForAuction(auction_id), (reason) => {return Promise.reject(reason)})
-            .then((bid) => verifyBidAndPlace(bid, amount, auction_id, user))
+        let auctionObj;
+        return getAuction(auction_id)
+            .then((auction) => {
+                auctionObj = auction;
+                return getMaxBidForAuction(auction_id) }, (reason) => {return Promise.reject(reason)})
+            .then((bid) => verifyBidAndPlace(bid, amount, auction_id, user, auctionObj))
             .then(() => {return Promise.resolve(globals.OKCreated)})
             .catch((reason) => {return Promise.reject(reason)});
     }
 };
+exports.p
 
 exports.createNewAuction = function(body, token){
     return user.findUserByToken(token)

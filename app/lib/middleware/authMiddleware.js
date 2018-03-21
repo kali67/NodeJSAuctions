@@ -1,6 +1,7 @@
 const user = require('../../models/users.server.model');
 const Validator = require('jsonschema').Validator;
 const globals = require('../../utilities/GlobalObjects');
+const auction = require('../../models/auctions.server.model');
 
 exports.authenticateToken = function(req, res, next){
     let token = req.header('X-Authorization');
@@ -8,6 +9,15 @@ exports.authenticateToken = function(req, res, next){
         .then(() => next())
         .catch((reason) => res.status(reason.code).send(reason.message));
 };
+
+exports.checkAuctionStarted = function(req, res, next){
+    auction.getAuctionBids(req.params.id, null)
+        .then((auction) => {
+            if (auction.bids[0]) {return Promise.reject(globals.Forbidden)}
+            else {next()}
+        }).catch((reason) => {res.status(reason.code).send(reason.message)})
+};
+
 
 exports.checkOwnsAuction = function(req, res, next){
     let token = req.header('X-Authorization');
@@ -21,10 +31,6 @@ exports.checkOwnsAuction = function(req, res, next){
             if (user.result[0] && user.result[0].auction_userid === userId){next()}
             else {res.status(globals.Unauthorized.code).send(globals.Unauthorized.message)}})
         .catch((reason) => console.log(reason));
-};
-
-exports.checkOwns = function(req, res, next){
-
 };
 
 exports.validateCreateAuctionJsonBody = function(req, res, next){

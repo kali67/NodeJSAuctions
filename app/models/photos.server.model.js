@@ -42,7 +42,7 @@ exports.deletePhoto = function(auctionId){
     let sql = "delete from photo where photo_auctionid = ?";
     let photoPath;
     return auction.checkAuctionExists(auctionId)
-        .then(() => findPhoto(auctionId), (reason) => {return Promise.reject(reason)})
+        .then(() => findPhoto(auctionId))
         .then((path) => {photoPath = path;databaseHelper.queryWithPromise(sql, [[auctionId]])}, (reason) => {return Promise.reject(reason)})
         .then(() => {
             fs.unlinkSync(photoPath.photo_image_URI);
