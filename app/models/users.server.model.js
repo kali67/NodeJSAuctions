@@ -84,7 +84,7 @@ function findUserByToken (token) {
 
 exports.removeTokenFromUser = function (user) {
     let values = [[user.user_id]];
-    let sql = "update auction_user set user_token = 'null' where user_id = ?";
+    let sql = "update auction_user set user_token = NULL where user_id = ?";
     return databaseHelper.queryWithPromise(sql, values)
         .then(() => {return Promise.resolve(globals.OK)})
         .catch(() => {return Promise.reject(globals.InternalServerError)})

@@ -31,7 +31,7 @@ exports.logout = function(req, res) {
     let token = req.get('X-Authorization');
     User.findUserByToken(token)
         .then((user) => User.removeTokenFromUser(user))
-        .then((result) => res.status(result.code).json(result.message))
+        .then((result) => {res.status(result.code).json(result.message)})
         .catch((reason) => res.status(reason.code).json(reason.message));
 };
 

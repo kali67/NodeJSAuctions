@@ -34,18 +34,7 @@ exports.reset = function(done){
     db.get_pool().query(query, function (err){
         if (err) {done (globals.InternalServerError)}
         else {
-            fs.readdir(photosDirectory, (err, files) => {
-                if (err) {done(globals.InternalServerError)}
-                if (files.length === 0){done(globals.OK)}
-                else {
-                    for (const file of files) {
-                        fs.unlink(path.join(photosDirectory, file), err => {
-                            if (err){done(globals.InternalServerError)}
-                        });
-                    }
-                    done(globals.OK);
-                }
-            });
+            done (globals.OK);
         }
     });
 };

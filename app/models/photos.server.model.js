@@ -46,7 +46,7 @@ exports.deletePhoto = function(auctionId){
         .then((path) => {photoPath = path;databaseHelper.queryWithPromise(sql, [[auctionId]])}, (reason) => {return Promise.reject(reason)})
         .then(() => {
             fs.unlinkSync(photoPath.photo_image_URI);
-            return Promise.resolve(globals.OK)})
+            return Promise.resolve(globals.OKCreated)})
         .catch((reason) => {return Promise.reject(reason)});
 };
 
