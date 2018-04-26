@@ -34,6 +34,9 @@ exports.reset = function(done){
     db.get_pool().query(query, function (err){
         if (err) {done (globals.InternalServerError)}
         else {
+            if (!fs.existsSync(photosDirectory)){
+                fs.mkdirSync(photosDirectory);
+            }
             done (globals.OK);
         }
     });
